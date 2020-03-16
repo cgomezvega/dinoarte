@@ -1,0 +1,107 @@
+<!doctype HTML>
+<html>
+<head>
+    <!-- <script src="scripts/aframe.min.js"></script> -->
+    <script src="https://aframe.io/releases/1.0.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/jeromeetienne/AR.js/2.2.2/aframe/build/aframe-ar.js"></script>
+    <!-- <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v4.1.2/dist/aframe-extras.min.js"></script> -->
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
+    <script>
+        //document.documentElement.webkitRequestFullScreen();
+    
+        var playing = false; // to make sure the first finishes before launching the second
+
+        var ankylosaurus_audio = new Audio("audio/ankylosaurus.mp3");
+
+        ankylosaurus_audio.addEventListener("ended", function() { audio_ended(ankylosaurus_audio, "ankylosaurus_audio"); });
+
+        AFRAME.registerComponent('markerhandler', {
+            init: function() {
+                this.tick = AFRAME.utils.throttleTick(this.tick, 500, this);
+            },
+            tick: function(t, dt) {
+                play_or_mute(ankylosaurus_audio, "ankylosaurus_audio", document.querySelector("#ankylosaurus_marker"));
+            }
+        }); 
+
+
+        var tyrannosaurusrex_audio = new Audio("audio//tyrannosaurusrex.mp3");
+
+        tyrannosaurusrex_audio.addEventListener("ended", function() { audio_ended(tyrannosaurusrex_audio, "tyrannosaurusrex_audio"); });
+
+        AFRAME.registerComponent('markerhandler1', {
+            init: function() {
+                this.tick = AFRAME.utils.throttleTick(this.tick, 500, this);
+            },
+            tick: function(t, dt) {
+                play_or_mute(tyrannosaurusrex_audio, "tyrannosaurusrex_audio", document.querySelector("#tyrannosaurusrex_marker"));
+            }
+        }); 
+
+
+        function play_or_mute(audio, name, marker) {
+            if (marker.object3D.visible == true && audio.muted == true) {
+                    audio_play(audio, name);
+                } 
+            if (marker.object3D.visible == false) {
+                audio_muted(audio, name);
+            }
+        }
+
+        function audio_play(audio, name) {
+            audio.play();
+            audio.muted = false;
+            playing = true;
+            console.log("audio_play " + name);
+        }
+
+        function audio_muted(audio, name) {
+            audio.muted = true;
+            console.log("audio_muted " + name);
+        }
+
+        function audio_unmuted(audio, name) {
+            audio.muted = false;
+            console.log("audio_unmuted " + name);
+        }
+
+        function audio_ended(audio, name) {
+            audio.currentTime = 0;
+            playing = false;
+            audio.muted = true;
+            console.log("audio_ended " + name);
+        }
+    </script>
+</head>
+<body style="margin : 0px; overflow: hidden;">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
+
+        <a-assets>
+            <audio id="ankylosaurus_audio" src="audio/ankylosaurus.mp3" preload="auto"></audio>
+            <audio id="tyrannosaurusrex_audio" src="audio/tyrannosaurusrex.mp3" preload="auto"></audio>
+            <!-- <video id="dinovideo" autoplay loop="true" src="videos/Ankylosaurus.mp4"></video> -->
+        </a-assets>
+
+        <a-marker id="ankylosaurus_marker" markerhandler registerevents emitevents="true" cursor="rayOrigin: mouse" type='barcode' value='1'>
+            <a-entity gltf-model="modelos/ankylosaurus.glb" crossOrigin="anonymous" 
+                scale="3 3 3" position="0 0 0" rotation="0 0 0" 
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"
+                />
+            <!-- <a-video src="#dinovideo" width="4" height="4" position="0 0 0"></a-video> -->
+        </a-marker>
+
+        <a-marker id="tyrannosaurusrex_marker" markerhandler1 registerevents emitevents="true" cursor="rayOrigin: mouse" type='barcode' value='2'>
+            <a-entity gltf-model="modelos/tyrannosaurusrex.glb" crossOrigin="anonymous" 
+                scale="0.5 0.5 0.5" position="0 0 0" rotation="0 0 0" 
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"
+                />
+            <!-- <a-video src="#dinovideo" width="4" height="4" position="0 0 0"></a-video> -->
+        </a-marker>
+
+        <a-entity sound="src: #ankylosaurus_audio" autoplay="false"></a-entity>
+        <a-entity sound="src: #tyrannosaurusrex_audio" autoplay="false"></a-entity>
+        <a-entity camera></a-entity>
+        
+    </a-scene>
+ </body>
+</html> 
